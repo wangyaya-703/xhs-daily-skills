@@ -7,6 +7,7 @@
   python3 run_v2.py              # 正常运行：抓取 + 分类 + 飞书推送
   python3 run_v2.py --scrape     # 仅抓取，输出 JSON 到 stdout
   python3 run_v2.py --test       # 测试模式：少量数据 + 推送
+  python3 run_v2.py --force      # 强制运行（忽略今日已推送锁）
 """
 
 import json
@@ -36,8 +37,14 @@ BB_BROWSER = os.environ.get("BB_BROWSER", "bb-browser")
 # 密钥配置文件（优先级低于环境变量）
 SECRETS_FILE = os.path.join(SCRIPT_DIR, "secrets.env")
 
-# 搜索关键词（精简为 4 个高差异化词）
-SEARCH_KEYWORDS = ["AI工具", "Claude", "Vibe Coding", "Agent"]
+# 搜索关键词默认值（可通过 config.json 覆盖）
+DEFAULT_SEARCH_KEYWORDS = ["AI工具", "Claude", "Vibe Coding", "Agent"]
+
+# 配置文件（支持自定义搜索关键词等）
+CONFIG_FILE = os.path.join(SCRIPT_DIR, "config.json")
+
+# 今日推送锁
+PUSH_LOCK_FILE = os.path.join(SCRIPT_DIR, ".push_lock")
 
 AI_KEYWORDS = [
     "ai", "大模型", "claude", "gpt", "llm", "agent", "grok",
@@ -56,6 +63,49 @@ LOG_FILE = os.path.join(SCRIPT_DIR, "run.log")
 # 去重记录
 SEEN_FILE = os.path.join(SCRIPT_DIR, "seen_ids.json")
 SEEN_DAYS = 3  # 保留最近 N 天的记录
+
+
+def load_config() -> dict:
+    """从 config.json 加载可自定义配置"""
+    if not os.path.exists(CONFIG_FILE):
+        return {}
+    try:
+        with open(CONFIG_FILE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def get_search_keywords() -> list:
+    """获取搜索关键词（config.json > 默认值）"""
+    config = load_config()
+    return config.get("search_keywords", DEFAULT_SEARCH_KEYWORDS)
+
+
+def check_push_lock(force: bool = False) -> bool:
+    """检查今日是否已推送。返回 True 表示可以继续推送。"""
+    if force:
+        return True
+    if not os.path.exists(PUSH_LOCK_FILE):
+        return True
+    try:
+        with open(PUSH_LOCK_FILE) as f:
+            lock_data = json.load(f)
+        lock_date = lock_data.get("date", "")
+        today = datetime.now().strftime("%Y-%m-%d")
+        if lock_date == today:
+            log(f"⚠️  今日已推送过（{lock_data.get('time', '')}），跳过。使用 --force 强制重跑。")
+            return False
+        return True
+    except Exception:
+        return True
+
+
+def set_push_lock():
+    """标记今日已成功推送"""
+    now = datetime.now()
+    with open(PUSH_LOCK_FILE, "w") as f:
+        json.dump({"date": now.strftime("%Y-%m-%d"), "time": now.strftime("%H:%M:%S")}, f)
 
 
 def load_secrets():
@@ -280,7 +330,8 @@ def scrape_all(test_mode: bool = False) -> list:
     added = add_notes(feed_notes)
     log(f"     首页流共 {added} 条")
 
-    keywords = SEARCH_KEYWORDS[:2] if test_mode else SEARCH_KEYWORDS
+    all_keywords = get_search_keywords()
+    keywords = all_keywords[:2] if test_mode else all_keywords
     for kw in keywords:
         log(f"  → 搜索「{kw}」...")
         try:
@@ -588,12 +639,17 @@ def main():
     args = sys.argv[1:]
     scrape_only = "--scrape" in args
     test_mode = "--test" in args
+    force_mode = "--force" in args
     date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     log(f"[{date_str}] 小红书 AI 日报 v2 (bb-browser)")
 
     if not scrape_only and not check_secrets():
         sys.exit(1)
+
+    # 今日推送锁检查（--scrape 不受限，--test 不受限，--force 跳过）
+    if not scrape_only and not test_mode and not check_push_lock(force_mode):
+        sys.exit(0)
 
     # 抓取
     all_notes = scrape_all(test_mode=test_mode)
@@ -635,6 +691,9 @@ def main():
         token = get_feishu_token()
         send_feishu_card(token, card)
         log("✅ 飞书卡片推送成功")
+        # 推送成功，写入今日锁
+        if not test_mode:
+            set_push_lock()
     except Exception as e:
         log(f"[飞书卡片推送失败] {e}")
         try:
@@ -642,6 +701,8 @@ def main():
                 token = get_feishu_token()
             send_feishu_message(token, report)
             log("✅ 降级纯文本推送成功")
+            if not test_mode:
+                set_push_lock()
         except Exception as e2:
             log(f"[纯文本推送也失败] {e2}")
 

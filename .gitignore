@@ -1,5 +1,7 @@
 secrets.env
 seen_ids.json
 run.log
+.push_lock
+config.json
 __pycache__/
 *.pyc

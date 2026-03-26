@@ -23,11 +23,14 @@ description: >
 ## 执行
 
 ```bash
-# 正常运行
+# 正常运行（每天仅推送一次）
 python3 run_v2.py
 
-# 测试模式（少量数据）
+# 测试模式（少量数据，不受推送锁限制）
 python3 run_v2.py --test
+
+# 强制重跑（忽略今日已推送锁）
+python3 run_v2.py --force
 
 # 仅抓取输出 JSON
 python3 run_v2.py --scrape
@@ -35,7 +38,11 @@ python3 run_v2.py --scrape
 
 ## 配置
 
-复制 `secrets.env.example` 为 `secrets.env` 并填入密钥。
+1. 复制 `secrets.env.example` 为 `secrets.env` 并填入密钥
+2. （可选）复制 `config.json.example` 为 `config.json`，自定义搜索关键词：
+   ```json
+   {"search_keywords": ["AI工具", "Claude", "Vibe Coding", "Agent", "你的关键词"]}
+   ```
 
 ## 依赖
 
