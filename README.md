@@ -477,6 +477,27 @@ For OpenAI / Claude integration, replace the HTTP request in `classify_one()` â€
 | Feishu push 403 | Verify app permission `im:message:send_as_bot` is enabled |
 | Duplicate pushes | Check if `.push_lock` file exists with correct date |
 
+### Secret Leak Guard
+
+Install local pre-commit scan:
+
+```bash
+./scripts/security/install_precommit_hook.sh
+```
+
+Run manual scans:
+
+```bash
+python3 scripts/security/scan_secrets.py --mode repo
+python3 scripts/security/scan_secrets.py --mode history
+```
+
+CI scan workflow:
+
+- `.github/workflows/secret-leak-scan.yml`
+- Runs on push / pull request / daily schedule
+- Scans both current files and full git history
+
 ### License
 
 MIT
