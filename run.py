@@ -15,8 +15,8 @@ from datetime import datetime
 from openai import OpenAI as _OpenAI
 
 # ── 配置 ──────────────────────────────────────────────
-FEISHU_APP_ID     = os.environ.get("FEISHU_APP_ID", "cli_redacted_legacy_app_id")
-FEISHU_APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "feishu_secret_redacted")
+FEISHU_APP_ID     = os.environ.get("FEISHU_APP_ID", "")
+FEISHU_APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "")
 FEISHU_USER_ID    = os.environ.get("FEISHU_USER_ID", "ou_91dca3ed6fc58b46a17b214cdffc7fc7")
 # 火山引擎方舟 GLM-4.7（兼容 OpenAI SDK）
 ARK_API_KEY       = os.environ.get("ARK_API_KEY", "[REDACTED_ARK_API_KEY]")
@@ -89,6 +89,8 @@ def feishu_request(path: str, payload: dict, token: str = None) -> dict:
 
 
 def get_feishu_token() -> str:
+    if not FEISHU_APP_ID or not FEISHU_APP_SECRET:
+        raise RuntimeError("缺少 FEISHU_APP_ID 或 FEISHU_APP_SECRET 环境变量")
     resp = feishu_request("/auth/v3/tenant_access_token/internal", {
         "app_id": FEISHU_APP_ID, "app_secret": FEISHU_APP_SECRET
     })

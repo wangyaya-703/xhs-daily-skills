@@ -17,8 +17,8 @@ import urllib.request
 from datetime import datetime
 
 # ── 配置 ──────────────────────────────────────────────
-FEISHU_APP_ID     = os.environ.get("FEISHU_APP_ID", "cli_redacted_luna_app_id")
-FEISHU_APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "feishu_secret_redacted")
+FEISHU_APP_ID     = os.environ.get("FEISHU_APP_ID", "")
+FEISHU_APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "")
 FEISHU_USER_ID    = os.environ.get("FEISHU_USER_ID", "ou_9fe2b3d22ed03b23efdeb3afe8d6c60f")
 
 ARK_API_KEY  = os.environ.get("ARK_API_KEY", "[REDACTED_ARK_API_KEY]")
@@ -205,6 +205,8 @@ def feishu_request(path: str, payload: dict, token: str = None) -> dict:
 
 
 def get_feishu_token() -> str:
+    if not FEISHU_APP_ID or not FEISHU_APP_SECRET:
+        raise RuntimeError("缺少 FEISHU_APP_ID 或 FEISHU_APP_SECRET 环境变量")
     resp = feishu_request("/auth/v3/tenant_access_token/internal", {
         "app_id": FEISHU_APP_ID, "app_secret": FEISHU_APP_SECRET
     })
