@@ -17,14 +17,16 @@ from openai import OpenAI as _OpenAI
 # ── 配置 ──────────────────────────────────────────────
 FEISHU_APP_ID     = os.environ.get("FEISHU_APP_ID", "")
 FEISHU_APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "")
-FEISHU_USER_ID    = os.environ.get("FEISHU_USER_ID", "ou_91dca3ed6fc58b46a17b214cdffc7fc7")
+FEISHU_USER_ID    = os.environ.get("FEISHU_USER_ID", "")
 # 火山引擎方舟 GLM-4.7（兼容 OpenAI SDK）
-ARK_API_KEY       = os.environ.get("ARK_API_KEY", "[REDACTED_ARK_API_KEY]")
+ARK_API_KEY       = os.environ.get("ARK_API_KEY", "")
 ARK_BASE_URL      = "https://ark.cn-beijing.volces.com/api/v3"
 ARK_MODEL         = "glm-4-7-251222"
 MCPORTER_TIMEOUT  = 90000
 SEARCH_TIMEOUT    = 12000           # 搜索快速超时，失败直接跳过
 MCPORTER_CONFIG   = os.path.expanduser("~/.claude/skills/config/mcporter.json")
+SCRIPT_DIR        = os.path.dirname(os.path.abspath(__file__))
+SECRETS_FILE      = os.path.join(SCRIPT_DIR, "secrets.env")
 
 SEARCH_KEYWORDS = ["AI工具", "Claude", "大模型", "Agent", "Vibe Coding", "OpenClaw"]
 
@@ -37,6 +39,44 @@ AI_KEYWORDS = [
 ]
 
 TREND_KEYWORDS = ["Claude", "Agent", "Vibe Coding", "大模型", "AI", "OpenClaw", "GPT", "多模态", "Cursor", "Manus"]
+
+
+def load_secrets():
+    """从 secrets.env 加载密钥（不覆盖已有环境变量）"""
+    global FEISHU_APP_ID, FEISHU_APP_SECRET, FEISHU_USER_ID, ARK_API_KEY
+    if os.path.exists(SECRETS_FILE):
+        with open(SECRETS_FILE, "r", encoding="utf-8") as f:
+            for raw in f:
+                line = raw.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+                if key and not os.environ.get(key):
+                    os.environ[key] = value
+
+    FEISHU_APP_ID = os.environ.get("FEISHU_APP_ID", "")
+    FEISHU_APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "")
+    FEISHU_USER_ID = os.environ.get("FEISHU_USER_ID", "")
+    ARK_API_KEY = os.environ.get("ARK_API_KEY", "")
+
+
+def check_secrets() -> bool:
+    missing = []
+    if not FEISHU_APP_ID:
+        missing.append("FEISHU_APP_ID")
+    if not FEISHU_APP_SECRET:
+        missing.append("FEISHU_APP_SECRET")
+    if not FEISHU_USER_ID:
+        missing.append("FEISHU_USER_ID")
+    if not ARK_API_KEY:
+        missing.append("ARK_API_KEY")
+    if missing:
+        print(f"❌ 缺少密钥: {', '.join(missing)}", file=sys.stderr)
+        print(f"请在 {SECRETS_FILE} 或环境变量中配置。", file=sys.stderr)
+        return False
+    return True
 
 
 # ── GLM API（火山引擎方舟，兼容 OpenAI SDK）─────────────
@@ -270,6 +310,10 @@ def format_report(data: dict, date_str: str) -> str:
 
 # ── 主流程 ────────────────────────────────────────────
 def main():
+    load_secrets()
+    if not check_secrets():
+        sys.exit(1)
+
     date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
     print(f"[{date_str}] 开始抓取小红书内容...")
 
