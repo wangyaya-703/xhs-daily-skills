@@ -29,8 +29,8 @@ FEISHU_APP_ID     = os.environ.get("FEISHU_APP_ID", "")
 FEISHU_APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "")
 FEISHU_USER_ID    = os.environ.get("FEISHU_USER_ID", "")
 ARK_API_KEY       = os.environ.get("ARK_API_KEY", "")
-ARK_BASE_URL      = os.environ.get("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
-ARK_MODEL         = os.environ.get("ARK_MODEL", "glm-4-7-251222")
+ARK_BASE_URL      = os.environ.get("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/coding/v3")
+ARK_MODEL         = os.environ.get("ARK_MODEL", "glm-4.7")
 
 BB_BROWSER = os.environ.get("BB_BROWSER", "bb-browser")
 

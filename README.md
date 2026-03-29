@@ -81,8 +81,8 @@ FEISHU_USER_ID=ou_xxxxxxxxxxxxxxxx     # 接收消息的用户 open_id
 ARK_API_KEY=your_ark_api_key_here
 
 # 可选：自定义模型端点
-# ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
-# ARK_MODEL=glm-4-7-251222
+# ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/coding/v3
+# ARK_MODEL=glm-4.7
 ```
 
 **如何获取这些值：**
@@ -318,8 +318,8 @@ FEISHU_USER_ID=ou_xxxxxxxxxxxxxxxx     # Target user's open_id
 ARK_API_KEY=your_ark_api_key_here
 
 # Optional: custom model endpoint
-# ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
-# ARK_MODEL=glm-4-7-251222
+# ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/coding/v3
+# ARK_MODEL=glm-4.7
 ```
 
 **How to obtain these values:**

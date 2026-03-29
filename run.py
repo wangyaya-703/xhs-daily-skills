@@ -20,8 +20,8 @@ FEISHU_APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "")
 FEISHU_USER_ID    = os.environ.get("FEISHU_USER_ID", "")
 # 火山引擎方舟 GLM-4.7（兼容 OpenAI SDK）
 ARK_API_KEY       = os.environ.get("ARK_API_KEY", "")
-ARK_BASE_URL      = "https://ark.cn-beijing.volces.com/api/v3"
-ARK_MODEL         = "glm-4-7-251222"
+ARK_BASE_URL      = os.environ.get("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/coding/v3")
+ARK_MODEL         = os.environ.get("ARK_MODEL", "glm-4.7")
 MCPORTER_TIMEOUT  = 90000
 SEARCH_TIMEOUT    = 12000           # 搜索快速超时，失败直接跳过
 MCPORTER_CONFIG   = os.path.expanduser("~/.claude/skills/config/mcporter.json")
