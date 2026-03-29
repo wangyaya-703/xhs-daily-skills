@@ -96,6 +96,21 @@ ARK_API_KEY=your_ark_api_key_here
 **飞书应用权限要求：**
 - `im:message:send_as_bot`（以机器人身份发送消息）
 
+#### Step 2.5 — 启用防泄露拦截（强烈建议）
+
+```bash
+# 安装 pre-commit 钩子（拦截硬编码密钥）
+./scripts/install-git-hooks.sh
+
+# 手动执行全量扫描
+./scripts/check-secrets.sh
+```
+
+说明：
+- 提交前会自动扫描暂存区，阻止 `APP Secret / API Key` 明文进入仓库。
+- CI 会在 PR / push 时执行 `gitleaks` 扫描（`.github/workflows/secret-scan.yml`）。
+- 若本机未安装 gitleaks，脚本会提示安装：`brew install gitleaks`。
+
 #### Step 3 — 自定义搜索关键词（可选）
 
 ```bash
@@ -333,6 +348,21 @@ ARK_API_KEY=your_ark_api_key_here
 **Required Feishu app permissions:**
 - `im:message:send_as_bot` (send messages as bot)
 
+#### Step 2.5 — Enable Secret-Leak Guardrails (Recommended)
+
+```bash
+# Install pre-commit hook (blocks hardcoded secrets)
+./scripts/install-git-hooks.sh
+
+# Run a full manual scan
+./scripts/check-secrets.sh
+```
+
+Notes:
+- Pre-commit scans staged changes and blocks plaintext `APP Secret / API Key`.
+- CI runs `gitleaks` on push and pull requests (`.github/workflows/secret-scan.yml`).
+- If gitleaks is not installed locally, install with: `brew install gitleaks`.
+
 #### Step 3 — Custom Search Keywords (Optional)
 
 ```bash
@@ -441,6 +471,10 @@ xhs-daily-skills/
 ├── SKILL.md               # Claude Code Skill descriptor
 ├── secrets.env.example    # Secrets template
 ├── config.json.example    # Search keywords config template
+├── .gitleaks.toml         # Secret scan config
+├── scripts/check-secrets.sh      # Local secret scanner
+├── scripts/install-git-hooks.sh  # Installs pre-commit hook
+├── .github/workflows/secret-scan.yml # CI secret scan
 ├── .gitignore             # Excludes secrets and runtime files
 ├── README.md              # This file
 │
