@@ -5,3 +5,4 @@ run.log
 config.json
 __pycache__/
 *.pyc
+.gitleaks-report.json

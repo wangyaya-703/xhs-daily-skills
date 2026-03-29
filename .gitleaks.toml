@@ -1,0 +1,13 @@
+title = "xhs-daily-skills gitleaks config"
+
+[allowlist]
+description = "Allow known placeholders"
+regexes = [
+  '''your_app_secret_here''',
+  '''your_ark_api_key_here''',
+  '''\[REDACTED_[A-Z0-9_]+\]''',
+]
+paths = [
+  '''secrets\.env\.example''',
+  '''README\.md''',
+]
