@@ -68,9 +68,9 @@ if command -v gitleaks >/dev/null 2>&1; then
       git show ":$f" > "$tmpdir/$f" 2>/dev/null || cp "$f" "$tmpdir/$f"
     done
 
-    gitleaks dir --source "$tmpdir" --no-banner --redact --config .gitleaks.toml
+    gitleaks dir "$tmpdir" --no-banner --redact --config .gitleaks.toml
   else
-    gitleaks dir --source . --no-banner --redact --config .gitleaks.toml
+    gitleaks dir . --no-banner --redact --config .gitleaks.toml
   fi
 else
   warn "gitleaks not found. Install it for stronger detection (brew install gitleaks)."
